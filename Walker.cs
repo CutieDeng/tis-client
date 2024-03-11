@@ -75,6 +75,54 @@ public class Solver {
         throw new NotImplementedException(); 
     }
 
+    public Expression Solve1(Expression src, ImmutableDictionary<Expression.Literal, Expression> ctx) { 
+        if (src is Expression.Literal l) {
+            if (ctx.TryGetValue(l, out var v)) {
+                return v; 
+            }
+            return l; 
+        } 
+        if (src is Expression.ExpressionList el) {
+            Expression[] exprs = el.Expressions; 
+            var op = exprs[0]; 
+            var args = exprs[1..]; 
+            if (args.Length == 1) {
+                // call 
+                var sop = Solve1(op, ctx); 
+                var args1 = Solve1(args[0], ctx); 
+                if (sop is Expression.ExpressionList el2) {
+                    Expression[] exprs2 = el2.Expressions; 
+                    var op2 = exprs2[0]; 
+                    var args2 = exprs2[1..]; 
+                    if (op2 is Expression.Literal lam) {
+                        if (lam.Value == "lambda") {
+                            if (args2[0] is not Expression.Literal arg) {
+                                throw new Exception("invalid lambda expression"); 
+                            }
+                            var ctx2 = ctx.Add(arg, args1); 
+                            return Solve1(args2[1], ctx2); 
+                        }
+                    } 
+                }
+                return new Expression.ExpressionList([sop, args1]); 
+            } else if (args.Length == 2) {
+                // lambda expression 
+                if (op is not Expression.Literal lam) {
+                    throw new Exception("invalid lambda expression"); 
+                } 
+                if (lam.Value != "lambda") {
+                    throw new Exception("invalid lambda expression"); 
+                }
+                if (args[0] is not Expression.Literal arg) {
+                    throw new Exception("invalid lambda expression"); 
+                } 
+                var args1 = Solve1(args[1], ctx.Remove(arg)); 
+                return new Expression.ExpressionList([lam, arg, args1]); 
+            }
+        } 
+        throw new NotImplementedException(); 
+    }
+
     public Expression Solve(Expression exp, ImmutableDictionary<Expression.Literal, Expression> ctx, Expression? toSubstitute = null) {
         if (exp is Expression.Literal l) {
             if (ctx.TryGetValue(l, out var v)) {
@@ -89,7 +137,7 @@ public class Solver {
         if (exp is Expression.ExpressionList el) {
             Expression[] exprs = el.Expressions; 
 
-            var op = Solve(exprs[0], ctx, null); 
+            var op = Solve(exprs[0], ctx); 
 
             var args = exprs[1..]; 
 

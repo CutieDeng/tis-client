@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Collections.Immutable;
+using Microsoft.Extensions.Logging;
 
 namespace maui0;
 
@@ -23,7 +24,7 @@ public static class MauiProgram
 		Console.WriteLine("start"); 
 		// string rl = "((lambda x x) z)";
 		// string rl = "((lambda t f u t) a b c)"; 
-		string rl = "(((lambda true false unknown true? (true? true false true)) (lambda t f u t) (lambda t f u f) (lambda t f u u)) (lambda t f q (q t f f)))"; 
+		string rl = "(((lambda true false unknown true? (true? true false unknown)) (lambda t f u t) (lambda t f u f) (lambda t f u u)) (lambda t f q (q t f f)))"; 
 		Console.WriteLine($"Read line: {rl}");
 		var rst = maui0.Expression.Parse(rl); 
 		Console.WriteLine($"Parsed: {rst}"); 
@@ -32,6 +33,8 @@ public static class MauiProgram
 		Console.WriteLine($"Normalize: {n}");
 		var rst2 = s.SolveNull(n); 
 		Console.WriteLine($"Solved: {rst2}"); 
+		var rst3 = s.Solve1(n, ImmutableDictionary<Expression.Literal, Expression>.Empty); 
+		Console.WriteLine($"Solved1: {rst3}"); 
 		return builder.Build();
 	}
 }
