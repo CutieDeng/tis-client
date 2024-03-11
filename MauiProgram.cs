@@ -20,7 +20,6 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
-
 		Console.WriteLine("start"); 
 		// string rl = "((lambda x x) z)";
 		// string rl = "((lambda t f u t) a b c)"; 
